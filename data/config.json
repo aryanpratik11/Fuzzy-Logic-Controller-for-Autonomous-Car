@@ -1,0 +1,5 @@
+{
+    "max_speed": 100,
+    "max_brake": 100,
+    "sensor_range": 50
+}
