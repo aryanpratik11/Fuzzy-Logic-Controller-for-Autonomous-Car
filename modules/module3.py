@@ -3,14 +3,13 @@ import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
 def create_pedestrian_response_system():
-    # Define input variables
-    ped_distance = ctrl.Antecedent(np.arange(0, 101, 1), 'ped_distance')
-    ped_movement = ctrl.Antecedent(np.arange(0, 3, 1), 'ped_movement')  # 0: Stationary, 1: Walking, 2: Running
-    vehicle_speed = ctrl.Antecedent(np.arange(0, 121, 1), 'vehicle_speed')
+    # Define fuzzy variables
+    ped_distance = ctrl.Antecedent(np.arange(0, 101, 1), 'ped_distance')        # Distance to pedestrian
+    ped_movement = ctrl.Antecedent(np.arange(0, 3, 1), 'ped_movement')          # 0: Stationary, 1: Walking, 2: Running
+    vehicle_speed = ctrl.Antecedent(np.arange(0, 121, 1), 'vehicle_speed')      # Vehicle speed
 
-    # Define output variables
-    deceleration = ctrl.Consequent(np.arange(0, 11, 1), 'deceleration')
-    warning_signal = ctrl.Consequent(np.arange(0, 101, 1), 'warning_signal')
+    deceleration = ctrl.Consequent(np.arange(0, 11, 1), 'deceleration')         # 0: None, 10: Full
+    warning_signal = ctrl.Consequent(np.arange(0, 101, 1), 'warning_signal')    # 0: Off, 100: High alert
 
     # Membership functions for inputs
     ped_distance['close'] = fuzz.trimf(ped_distance.universe, [0, 0, 40])
@@ -36,7 +35,7 @@ def create_pedestrian_response_system():
     warning_signal['medium'] = fuzz.trimf(warning_signal.universe, [40, 60, 80])
     warning_signal['high'] = fuzz.trimf(warning_signal.universe, [70, 100, 100])
 
-    # Rules
+    # Rule base
     rules = [
         ctrl.Rule(ped_distance['close'] & ped_movement['walking'],
                   consequent=[deceleration['moderate'], warning_signal['high']]),
@@ -69,8 +68,6 @@ def create_pedestrian_response_system():
                   consequent=[deceleration['none'], warning_signal['off']])
     ]
 
-    # Create control system
-    pedestrian_ctrl = ctrl.ControlSystem(rules)
-    pedestrian_simulation = ctrl.ControlSystemSimulation(pedestrian_ctrl)
-
-    return pedestrian_simulation
+    # Create and return simulation system
+    system = ctrl.ControlSystem(rules)
+    return ctrl.ControlSystemSimulation(system)
